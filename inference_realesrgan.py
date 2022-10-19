@@ -55,39 +55,41 @@ def main():
 
     ### tuan add
     args.fp32 = True
-    ip = input("input folder, default (inputs): ")
-    if ip:
-        args.input = ip
-    sv = input("Save Folder, default (results): ")
-    if sv:
-        args.output =  sv
-    if args.input != args.output:
-        args.suffix = ''
-    else:
-        args.suffix = 'resized'
+    custom = input("Do you want custom options? y/n: ")
+    if custom.lower() == 'y':
+        ip = input("input folder, default (inputs): ")
+        if ip:
+            args.input = ip
+        sv = input("Save Folder, default (results): ")
+        if sv:
+            args.output =  sv
+        if args.input != args.output:
+            args.suffix = ''
+        else:
+            args.suffix = 'resized'
 
-    print("================= AI Model ===================")
-    print(" 1 = RealESRGAN_x4plus")
-    print(" 2 = RealESRNet_x4plus")
-    print(" 3 = RealESRGAN_x4plus_anime_6B")
-    print(" 4 = RealESRGAN_x2plus")
-    print(" 5 = realesr-animevideov3")
-    print(" 6 = realesr-general-x4v3")
-    print("==============================================")
-    mode = input("Select AI model, default (1): ")
-    if mode == "1": args.model_name = 'RealESRGAN_x4plus'
-    if mode == "2": args.model_name = 'RealESRNet_x4plus'
-    if mode == "3": args.model_name = 'RealESRGAN_x4plus_anime_6B'
-    if mode == "4": args.model_name = 'RealESRGAN_x2plus'
-    if mode == "5": args.model_name = 'realesr-animevideov3'
-    if mode == "6": args.model_name = 'realesr-general-x4v3'
-    # args.gpu_id = 0
+        print("================= AI Model ===================")
+        print(" 1 = RealESRGAN_x4plus")
+        print(" 2 = RealESRNet_x4plus")
+        print(" 3 = RealESRGAN_x4plus_anime_6B")
+        print(" 4 = RealESRGAN_x2plus")
+        print(" 5 = realesr-animevideov3")
+        print(" 6 = realesr-general-x4v3")
+        print("==============================================")
+        mode = input("Select AI model, default (1): ")
+        if mode == "1": args.model_name = 'RealESRGAN_x4plus'
+        if mode == "2": args.model_name = 'RealESRNet_x4plus'
+        if mode == "3": args.model_name = 'RealESRGAN_x4plus_anime_6B'
+        if mode == "4": args.model_name = 'RealESRGAN_x2plus'
+        if mode == "5": args.model_name = 'realesr-animevideov3'
+        if mode == "6": args.model_name = 'realesr-general-x4v3'
+        # args.gpu_id = 0
 
     print("\nPlease re-Check your options:")
     print(f"Input folder: {args.input}")
     print(f"Output folder: {args.output}")
-    cf = input("Confirm? y/n: ")
-    if cf.lower() != 'y':
+    cf = input("Confirm? y/n, default(y): ")
+    if cf.lower() == 'n':
         return
     print("Preparing environment....")
     ###
