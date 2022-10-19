@@ -8,7 +8,6 @@ from basicsr.utils.download_util import load_file_from_url
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
-
 def main():
     """Inference demo for Real-ESRGAN.
     """
@@ -37,8 +36,7 @@ def main():
     parser.add_argument('--tile_pad', type=int, default=10, help='Tile padding')
     parser.add_argument('--pre_pad', type=int, default=0, help='Pre padding size at each border')
     parser.add_argument('--face_enhance', action='store_true', help='Use GFPGAN to enhance face')
-    parser.add_argument(
-        '--fp32', action='store_true', help='Use fp32 precision during inference. Default: fp16 (half precision).')
+    parser.add_argument('--fp32', action='store_true', help='Use fp32 precision during inference. Default: fp16 (half precision).')
     parser.add_argument(
         '--alpha_upsampler',
         type=str,
@@ -53,6 +51,45 @@ def main():
         '-g', '--gpu-id', type=int, default=None, help='gpu device to use (default=None) can be 0,1,2 for multi-gpu')
 
     args = parser.parse_args()
+
+    ### tuan add
+    args.fp32 = True
+    ip = input("input folder, default (inputs): ")
+    if ip:
+        args.input = ip
+    sv = input("Save Folder, default (results): ")
+    if sv:
+        args.output =  sv
+    if args.input != args.output:
+        args.suffix = ''
+    else:
+        args.suffix = 'resized'
+
+    print("================= AI Model ===================")
+    print(" 1 = RealESRGAN_x4plus")
+    print(" 2 = RealESRNet_x4plus")
+    print(" 3 = RealESRGAN_x4plus_anime_6B")
+    print(" 4 = RealESRGAN_x2plus")
+    print(" 5 = realesr-animevideov3")
+    print(" 6 = realesr-general-x4v3")
+    print("==============================================")
+    mode = input("Select AI model, default (1): ")
+    if mode == "1": args.model_name = 'RealESRGAN_x4plus'
+    if mode == "2": args.model_name = 'RealESRNet_x4plus'
+    if mode == "3": args.model_name = 'RealESRGAN_x4plus_anime_6B'
+    if mode == "4": args.model_name = 'RealESRGAN_x2plus'
+    if mode == "5": args.model_name = 'realesr-animevideov3'
+    if mode == "6": args.model_name = 'realesr-general-x4v3'
+    # args.gpu_id = 0
+
+    print("\nPlease re-Check your options:")
+    print(f"Input folder: {args.input}")
+    print(f"Output folder: {args.output}")
+    cf = input("Confirm? y/n: ")
+    if cf.lower() != 'y':
+        return
+    print("Preparing environment....")
+    ###
 
     # determine models according to model names
     args.model_name = args.model_name.split('.')[0]
@@ -115,6 +152,8 @@ def main():
         half=not args.fp32,
         gpu_id=args.gpu_id)
 
+    print(f"Using {upsampler.device} to scale")
+
     if args.face_enhance:  # Use GFPGAN for face enhancement
         from gfpgan import GFPGANer
         face_enhancer = GFPGANer(
@@ -129,37 +168,43 @@ def main():
         paths = [args.input]
     else:
         paths = sorted(glob.glob(os.path.join(args.input, '*')))
-
+    print("\n======================== WORKING ===========================")
     for idx, path in enumerate(paths):
-        imgname, extension = os.path.splitext(os.path.basename(path))
-        print('Testing', idx, imgname)
-
-        img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-        if len(img.shape) == 3 and img.shape[2] == 4:
-            img_mode = 'RGBA'
-        else:
-            img_mode = None
-
+        print(f'++++++++++++++++++++++++{idx}++++++++++++++++++++++++')
         try:
-            if args.face_enhance:
-                _, _, output = face_enhancer.enhance(img, has_aligned=False, only_center_face=False, paste_back=True)
+            imgname, extension = os.path.splitext(os.path.basename(path))
+            print('Resizing image: ', imgname)
+
+            img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+            if len(img.shape) == 3 and img.shape[2] == 4:
+                img_mode = 'RGBA'
             else:
-                output, _ = upsampler.enhance(img, outscale=args.outscale)
-        except RuntimeError as error:
-            print('Error', error)
-            print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
-        else:
-            if args.ext == 'auto':
-                extension = extension[1:]
+                img_mode = None
+
+            try:
+                if args.face_enhance:
+                    _, _, output = face_enhancer.enhance(img, has_aligned=False, only_center_face=False, paste_back=True)
+                else:
+                    output, _ = upsampler.enhance(img, outscale=args.outscale)
+            except RuntimeError as error:
+                print('Error', error)
+                print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
             else:
-                extension = args.ext
-            if img_mode == 'RGBA':  # RGBA images should be saved in png format
-                extension = 'png'
-            if args.suffix == '':
-                save_path = os.path.join(args.output, f'{imgname}.{extension}')
-            else:
-                save_path = os.path.join(args.output, f'{imgname}_{args.suffix}.{extension}')
-            cv2.imwrite(save_path, output)
+                if args.ext == 'auto':
+                    extension = extension[1:]
+                else:
+                    extension = args.ext
+                if img_mode == 'RGBA':  # RGBA images should be saved in png format
+                    extension = 'png'
+                if args.suffix == '':
+                    save_path = os.path.join(args.output, f'{imgname}.{extension}')
+                else:
+                    save_path = os.path.join(args.output, f'{imgname}_{args.suffix}.{extension}')
+                cv2.imwrite(save_path, output)
+                print(f'Saved to {save_path}')
+        except Exception as ex:
+            print(ex)
+    print("======================== FINISHED ===========================")
 
 
 if __name__ == '__main__':
