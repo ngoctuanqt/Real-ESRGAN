@@ -170,6 +170,7 @@ def main():
     else:
         paths = sorted(glob.glob(os.path.join(args.input, '*')))
     print("\n======================== WORKING ===========================")
+    print(f"Found {len(paths)} files to resize")
     for idx, path in enumerate(paths):
         print(f'++++++++++++++++++++++++{idx}++++++++++++++++++++++++')
         try:
