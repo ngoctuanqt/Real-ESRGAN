@@ -8,6 +8,7 @@ from basicsr.utils.download_util import load_file_from_url
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
+
 def main():
     """Inference demo for Real-ESRGAN.
     """
@@ -205,7 +206,6 @@ def main():
         except Exception as ex:
             print(ex)
     print("======================== FINISHED ===========================")
-
 
 if __name__ == '__main__':
     main()
