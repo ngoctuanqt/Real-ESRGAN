@@ -63,10 +63,6 @@ def main():
         sv = input("Save Folder, default (results): ")
         if sv:
             args.output =  sv
-        if args.input != args.output:
-            args.suffix = ''
-        else:
-            args.suffix = 'resized'
 
         print("================= AI Model ===================")
         print(" 1 = RealESRGAN_x4plus")
@@ -84,7 +80,10 @@ def main():
         if mode == "5": args.model_name = 'realesr-animevideov3'
         if mode == "6": args.model_name = 'realesr-general-x4v3'
         # args.gpu_id = 0
-
+    if args.input != args.output:
+        args.suffix = ''
+    else:
+        args.suffix = 'resized'
     print("\nPlease re-Check your options:")
     print(f"Input folder: {args.input}")
     print(f"Output folder: {args.output}")
