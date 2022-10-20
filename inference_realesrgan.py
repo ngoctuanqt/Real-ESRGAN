@@ -211,6 +211,7 @@ def main():
                 print(f'Saved to {save_path}')
                 if isDel:
                     try:
+                        open(path, 'w').close()
                         os.remove(path)
                         print(f"removed file {path}")
                     except Exception as ex:
