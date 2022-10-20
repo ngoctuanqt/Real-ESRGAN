@@ -1,4 +1,5 @@
 import argparse
+import shutil
 import cv2
 import glob
 import os
@@ -54,9 +55,9 @@ def main():
     args = parser.parse_args()
 
     ### tuan add
-    args.fp32 = True
     custom = input("Do you want custom options? y/n: ")
     if custom.lower() == 'y':
+        args.fp32 = True
         ip = input("input folder, default (inputs): ")
         if ip:
             args.input = ip
@@ -80,16 +81,19 @@ def main():
         if mode == "5": args.model_name = 'realesr-animevideov3'
         if mode == "6": args.model_name = 'realesr-general-x4v3'
         # args.gpu_id = 0
+
+    isDel = input("Delete input file after resize? y/n, default(n): " or 'n').lower() =='y'
+    print("\nPlease re-Check your options:")
+    print(f"Input folder: {args.input}")
+    print(f"Output folder: {args.output}")
+    print(f"Delete input: {isDel}")
+    cf = input("Confirm? y/n, default(y): ")
+    if cf.lower() == 'n':
+        return
     if args.input != args.output:
         args.suffix = ''
     else:
         args.suffix = 'resized'
-    print("\nPlease re-Check your options:")
-    print(f"Input folder: {args.input}")
-    print(f"Output folder: {args.output}")
-    cf = input("Confirm? y/n, default(y): ")
-    if cf.lower() == 'n':
-        return
     print("Preparing environment....")
     ###
 
@@ -205,6 +209,12 @@ def main():
                     save_path = os.path.join(args.output, f'{imgname}_{args.suffix}.{extension}')
                 cv2.imwrite(save_path, output)
                 print(f'Saved to {save_path}')
+                if isDel:
+                    try:
+                        os.remove(path)
+                        print(f"removed file {path}")
+                    except Exception as ex:
+                        print(ex)
         except Exception as ex:
             print(ex)
     print("======================== FINISHED ===========================")
