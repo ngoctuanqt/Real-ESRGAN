@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 import shutil
 import cv2
 import glob
@@ -82,7 +83,9 @@ def main():
         if mode == "6": args.model_name = 'realesr-general-x4v3'
         # args.gpu_id = 0
 
-    isDel = input("Delete input file after resize? y/n, default(n): " or 'n').lower() =='y'
+    sub = (input("Do you want resize on sub folder also? y/n, default(y): ") or 'y').lower()  == 'y'
+
+    isDel = (input("Delete input file after resize? y/n, default(n): ") or 'n').lower() =='y'
     print("\nPlease re-Check your options:")
     print(f"Input folder: {args.input}")
     print(f"Output folder: {args.output}")
@@ -173,10 +176,18 @@ def main():
     if os.path.isfile(args.input):
         paths = [args.input]
     else:
-        paths = sorted(glob.glob(os.path.join(args.input, '*')))
+        if not sub:
+            paths = sorted(glob.glob(os.path.join(args.input, '*')))
+        else:
+            paths = sorted(Path(args.input).rglob("*"))
     print("\n======================== WORKING ===========================")
     print(f"Found {len(paths)} files to resize")
     for idx, path in enumerate(paths):
+        path = str(path)
+        if not os.path.isfile(path):
+            continue
+        parDir = os.path.dirname(os.path.abspath(path))
+        subDir = parDir.replace(args.input,'')
         print(f'++++++++++++++++++++++++{idx}++++++++++++++++++++++++')
         try:
             imgname, extension = os.path.splitext(os.path.basename(path))
@@ -211,19 +222,29 @@ def main():
                     extension = args.ext
                 if img_mode == 'RGBA':  # RGBA images should be saved in png format
                     extension = 'png'
+                saveOutput = args.output
+
+                if subDir:
+                    saveOutput = f'{saveOutput}{subDir}'
+                if not os.path.exists(saveOutput):
+                    os.makedirs(saveOutput, exist_ok=True)
+
                 if args.suffix == '':
-                    save_path = os.path.join(args.output, f'{imgname}.{extension}')
+                    save_path = os.path.join(saveOutput, f'{imgname}.{extension}')
                 else:
-                    save_path = os.path.join(args.output, f'{imgname}_{args.suffix}.{extension}')
-                cv2.imwrite(save_path, output)
-                print(f'Saved to {save_path}')
-                if isDel:
-                    try:
-                        open(path, 'w').close()
-                        os.remove(path)
-                        print(f"removed file {path}")
-                    except Exception as ex:
-                        print(ex)
+                    save_path = os.path.join(saveOutput, f'{imgname}_{args.suffix}.{extension}')
+                if cv2.imwrite(save_path, output):
+                    print(f'Saved to {save_path}')
+                    if isDel:
+                        try:
+                            open(path, 'w').close()
+                            os.remove(path)
+                            print(f"removed file {path}")
+                        except Exception as ex:
+                            print(ex)
+                else:
+                    print(f'Failed to saved to {save_path}')
+
         except Exception as ex:
             print(ex)
     print("======================== FINISHED ===========================")
