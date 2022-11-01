@@ -85,11 +85,12 @@ def main():
 
     sub = (input("Do you want resize on sub folder also? y/n, default(y): ") or 'y').lower()  == 'y'
 
-    isDel = (input("Delete input file after resize? y/n, default(n): ") or 'n').lower() =='y'
+    isDel = (input("Delete input file after resize? y/n, default(y): ") or 'y').lower() =='y'
     print("\nPlease re-Check your options:")
     print(f"Input folder: {args.input}")
     print(f"Output folder: {args.output}")
     print(f"Delete input: {isDel}")
+    print(f"Resize on sub folder also: {sub}")
     cf = input("Confirm? y/n, default(y): ")
     if cf.lower() == 'n':
         return
