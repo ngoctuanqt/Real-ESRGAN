@@ -6,10 +6,31 @@ import glob
 import os
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.utils.download_util import load_file_from_url
-
+from PIL import Image
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
+def adjust(image, w, h, center = False, padding = 50):
+    print("adjust")
+    # image = image.convert('RGBA')
+    width, height = image.size
+    wr = width/w
+    hr = height/h
+    if wr > hr:
+        new_width = w - padding*2
+        new_height = new_width * height // width
+    else:
+        new_height = h - padding*2
+        new_width = new_height * width // height
+    image = image.resize((new_width, new_height))
+    new_image = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    left = (w-image.size[0]) // 2
+    if center:
+        top = (h - image.size[1]) // 2
+    else:
+        top = padding if h - image.size[1] > padding*2 else (h - image.size[1])//3
+    new_image.paste(image, (left, top))
+    return new_image
 
 def main():
     """Inference demo for Real-ESRGAN.
@@ -86,11 +107,19 @@ def main():
     sub = (input("Do you want resize on sub folder also? y/n, default(y): ") or 'y').lower()  == 'y'
 
     isDel = (input("Delete input file after resize? y/n, default(y): ") or 'y').lower() =='y'
+    customSize = input("Do you want custom size? y/n, default(4500x5400): ")
+    width =  4500
+    height = 5400
+    if customSize.lower() == 'y':
+        width = int(input("Image width, default(4500): ")) or 4500
+        height = int(input("Image height, default(5400): ")) or 5400
     print("\nPlease re-Check your options:")
     print(f"Input folder: {args.input}")
     print(f"Output folder: {args.output}")
     print(f"Delete input: {isDel}")
     print(f"Resize on sub folder also: {sub}")
+    print(f"Image width: {width}")
+    print(f"Image height: {height}")
     cf = input("Confirm? y/n, default(y): ")
     if cf.lower() == 'n':
         return
@@ -234,7 +263,11 @@ def main():
                     save_path = os.path.join(saveOutput, f'{imgname}.{extension}')
                 else:
                     save_path = os.path.join(saveOutput, f'{imgname}_{args.suffix}.{extension}')
-                if cv2.imwrite(save_path, output):
+                imageRGB = cv2.cvtColor(output, cv2.COLOR_BGRA2RGBA)
+                img = Image.fromarray(imageRGB)
+                outp = adjust(img, width, height)
+                if outp.save(save_path) == None:
+                # if cv2.imwrite(save_path, output):
                     print(f'Saved to {save_path}')
                     if isDel:
                         try:
