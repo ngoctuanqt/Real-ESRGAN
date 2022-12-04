@@ -239,11 +239,13 @@ def main():
                 print('Error', error)
                 if "slow_conv2d_cpu" in str(error):
                     print('You should add --fp32')
-                    break
+                    # break
+                    continue
 
                 if "out of memory" in str(error):
                     print('You should add --tile 265')
-                    break
+                    # break
+                    continue
 
                 print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
             else:
