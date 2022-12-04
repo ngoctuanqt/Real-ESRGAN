@@ -4,6 +4,7 @@ import shutil
 import cv2
 import glob
 import os
+import numpy as np
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.utils.download_util import load_file_from_url
 from PIL import Image
@@ -264,21 +265,34 @@ def main():
                 else:
                     save_path = os.path.join(saveOutput, f'{imgname}_{args.suffix}.{extension}')
                 imageRGB = cv2.cvtColor(output, cv2.COLOR_BGRA2RGBA)
-                img = Image.fromarray(imageRGB)
-                outp = adjust(img, width, height)
-                if outp.save(save_path) == None:
-                # if cv2.imwrite(save_path, output):
-                    print(f'Saved to {save_path}')
-                    if isDel:
-                        try:
-                            open(path, 'w').close()
-                            os.remove(path)
-                            print(f"removed file {path}")
-                        except Exception as ex:
-                            print(ex)
-                else:
-                    print(f'Failed to saved to {save_path}')
-
+                try:
+                    img = Image.fromarray(imageRGB)
+                    outp = adjust(img, width, height)
+                    if outp.save(save_path) == None:
+                        print(f'Saved to {save_path}')
+                        if isDel:
+                            try:
+                                open(path, 'w').close()
+                                os.remove(path)
+                                print(f"removed file {path}")
+                            except Exception as ex:
+                                print(ex)
+                    else:
+                        print(f'Failed to saved to {save_path}')
+                except Exception as ex:
+                    try:
+                        if cv2.imwrite(save_path, output):
+                            print(f'Saved to {save_path}')
+                            if isDel:
+                                try:
+                                    open(path, 'w').close()
+                                    os.remove(path)
+                                    print(f"removed file {path}")
+                                    continue
+                                except Exception as ex:
+                                    print(ex)
+                    except Exception as ex:
+                        print(ex)
         except Exception as ex:
             print(ex)
     print("======================== FINISHED ===========================")
