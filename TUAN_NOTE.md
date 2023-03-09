@@ -1,5 +1,5 @@
-1. install miniconda
-2. install git
+1. install miniconda https://docs.conda.io/en/latest/miniconda.html
+2. install git https://git-scm.com/download/win
 3. open miniconda
 	check cuda version: conda list cudatoolkit
 	install touch:
