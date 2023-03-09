@@ -10,7 +10,9 @@ install touch:
 	
 	pip3 install torch torchvision torchaudio
 4. clone:
+	
 	git clone https://github.com/ngoctuanqt/Real-ESRGAN.git
+	
 	cd Real-ESRGAN
 5. config
 
